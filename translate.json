@@ -1,0 +1,20 @@
+{
+    "zh-CN": {
+        "agent-dashboard>welcome": "欢迎回来，{name}",
+        "agent-dashboard>slogan": "智行Intelligent ERP · 7x24小时智能陪伴，助力企业高效运营",
+        "agent-dashboard>trend>title": "业务趋势",
+        "agent-dashboard>trend>revenue": "收入",
+        "agent-dashboard>trend>orders": "订单量",
+        "agent-dashboard>running>title": "运行中的Agent",
+        "agent-dashboard>running>view-all": "全部Agent >",
+        "agent-dashboard>kpi>title": "核心Agent工作成效",
+        "agent-dashboard>kpi>this-month": "本月",
+        "agent-dashboard>kpi>view-all": "查看全部效果 >",
+        "agent-dashboard>assistant>title": "AI助手快捷入口",
+        "agent-dashboard>assistant>manage": "管理 >",
+        "agent-dashboard>assistant>collected": "已收藏",
+        "agent-dashboard>assistant>add": "添加助手",
+        "agent-dashboard>insight>title": "Agent洞察与预警（最新报告）",
+        "agent-dashboard>insight>view-all": "查看全部报告 >"
+    }
+}
