@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent Dashboard - Dev Preview (模拟 CETA 平台)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .platform-header {
+            background: #001529;
+            color: #fff;
+            padding: 12px 24px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .platform-header .logo {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .platform-header .hint {
+            font-size: 12px;
+            color: #8c8c8c;
+        }
+
+        .platform-body {
+            padding: 16px;
+        }
+
+        #app {
+            background: #fff;
+            border-radius: 8px;
+            min-height: calc(100vh - 80px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="platform-header">
+        <span class="logo">CETA 平台 (本地模拟)</span>
+        <span class="hint">此页面仅用于本地开发预览，模拟宿主平台加载组件扩展</span>
+    </div>
+    <div class="platform-body">
+        <div id="app"></div>
+    </div>
+    <script type="module">
+        import mount from './entry.js';
+        import { mockRestApi } from './src/mockRestApi.ts';
+
+        // 模拟 CETA 平台的 i18nApi
+        const mockI18nApi = {
+            language: 'zh-CN',
+            t: (key) => key,
+        };
+
+        // 模拟平台调用 mount，传入容器和各种 API
+        // index.html 本地预览始终使用 mock 数据
+        mount(document.getElementById('app'), {
+            params: { period: 'month' },
+            formApi: {},
+            messageApi: { error: console.error, warning: console.warn, success: console.log },
+            restApi: mockRestApi,
+            i18nApi: mockI18nApi,
+            routerApi: { navigate: (path) => console.log('navigate:', path) },
+        });
+    </script>
+</body>
+
+</html>
