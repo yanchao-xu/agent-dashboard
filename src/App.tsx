@@ -1,104 +1,110 @@
-import { useState, useEffect } from 'react';
-import type { RestApi, I18nApi } from '../icp-extension.types';
+import { useState, useEffect } from "react";
+import type { RestApi, I18nApi, RouterApi, MessageApi } from "../icp-extension.types";
 import type {
-  Notification,
-  BusinessTrend,
-  RunningAgent,
-  AgentKPI,
-  AIAssistant,
-  InsightReport,
+  HitlTodo,
+  AgentTask,
+  AgentMetricDefinition,
+  AgentBusinessMetricDaily,
+  UserAgentFavorite,
+  AgentInsightReport,
+  AgentRegistry,
   UserInfo,
-} from './types';
+} from "./types";
 import {
-  mockUserInfo,
-  mockNotifications,
-  mockBusinessTrend,
-  mockRunningAgents,
-  mockAgentKPIs,
-  mockAIAssistants,
-  mockInsightReports,
-} from './mockData';
-import { I18nContext } from './i18n';
-import NotificationPanel from './components/NotificationPanel';
-import BusinessTrendChart from './components/BusinessTrendChart';
-import RunningAgentList from './components/RunningAgentList';
-import AgentKPICards from './components/AgentKPICards';
-import AIAssistantPanel from './components/AIAssistantPanel';
-import InsightReportPanel from './components/InsightReportPanel';
+  fetchHitlTodos,
+  fetchAgentTasks,
+  fetchMetricDefinitions,
+  fetchMetricDailyValues,
+  fetchUserAgentFavorites,
+  fetchInsightReports,
+  fetchAgentRegistry,
+} from "./api";
+
+import { I18nContext } from "./i18n";
+import NotificationPanel from "./components/NotificationPanel";
+import BusinessTrendChart from "./components/BusinessTrendChart";
+import RunningAgentList from "./components/RunningAgentList";
+import AgentKPICards from "./components/AgentKPICards";
+import AIAssistantPanel from "./components/AIAssistantPanel";
+import InsightReportPanel from "./components/InsightReportPanel";
 
 interface AppProps {
   restApi?: RestApi;
   i18nApi?: I18nApi;
+  messageApi?: MessageApi;
+  routerApi?: RouterApi;
   params?: Record<string, any>;
 }
 
-export default function App({ restApi, i18nApi, params }: AppProps) {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [businessTrend, setBusinessTrend] = useState<BusinessTrend | null>(null);
-  const [runningAgents, setRunningAgents] = useState<RunningAgent[]>([]);
-  const [agentKPIs, setAgentKPIs] = useState<AgentKPI[]>([]);
-  const [assistants, setAssistants] = useState<AIAssistant[]>([]);
-  const [reports, setReports] = useState<InsightReport[]>([]);
+export default function App({ restApi, i18nApi, messageApi, routerApi, params }: AppProps) {
+  const [hitlTodos, setHitlTodos] = useState<HitlTodo[]>([]);
+  const [agentTasks, setAgentTasks] = useState<AgentTask[]>([]);
+  const [metricDefinitions, setMetricDefinitions] = useState<
+    AgentMetricDefinition[]
+  >([]);
+  const [metricDailyValues, setMetricDailyValues] = useState<
+    AgentBusinessMetricDaily[]
+  >([]);
+  const [favorites, setFavorites] = useState<UserAgentFavorite[]>([]);
+  const [insightReports, setInsightReports] = useState<AgentInsightReport[]>(
+    [],
+  );
+  const [agentRegistry, setAgentRegistry] = useState<AgentRegistry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const period = params?.period || '本月';
+  const period = params?.period || "month";
+
+  // userInfo comes from host params, not from API
+  const userInfo: UserInfo | null = params?.userInfo
+    ? {
+      name: params.userInfo.name || "",
+      role: params.userInfo.role || "",
+      period: params.userInfo.period || period,
+    }
+    : null;
 
   useEffect(() => {
-    async function fetchData() {
+    async function loadData() {
       if (!restApi) {
-        // 没有 restApi 时直接使用 mock 数据
-        useMockData();
+        console.error("restApi is not provided");
+        setLoading(false);
         return;
       }
 
       try {
         const [
-          userRes,
-          notifRes,
-          trendRes,
-          agentsRes,
-          kpiRes,
-          assistantRes,
+          hitlRes,
+          taskRes,
+          metricDefRes,
+          metricDailyRes,
+          favoriteRes,
           reportRes,
+          registryRes,
         ] = await Promise.all([
-          restApi.get('/api/dashboard/user-info'),
-          restApi.get('/api/dashboard/notifications'),
-          restApi.get(`/api/dashboard/business-trend?period=${period}`),
-          restApi.get('/api/dashboard/running-agents'),
-          restApi.get(`/api/dashboard/agent-kpis?period=${period}`),
-          restApi.get('/api/dashboard/ai-assistants'),
-          restApi.get('/api/dashboard/insight-reports'),
+          fetchHitlTodos(restApi),
+          fetchAgentTasks(restApi),
+          fetchMetricDefinitions(restApi),
+          fetchMetricDailyValues(restApi),
+          fetchUserAgentFavorites(restApi),
+          fetchInsightReports(restApi),
+          fetchAgentRegistry(restApi),
         ]);
 
-        setUserInfo(userRes);
-        setNotifications(notifRes);
-        setBusinessTrend(trendRes);
-        setRunningAgents(agentsRes);
-        setAgentKPIs(kpiRes);
-        setAssistants(assistantRes);
-        setReports(reportRes);
+        setHitlTodos(hitlRes);
+        setAgentTasks(taskRes);
+        setMetricDefinitions(metricDefRes);
+        setMetricDailyValues(metricDailyRes);
+        setFavorites(favoriteRes);
+        setInsightReports(reportRes);
+        setAgentRegistry(registryRes);
       } catch (err) {
-        console.error('Dashboard data fetch error, falling back to mock data:', err);
-        // API 请求失败时 fallback 到 mock 数据
-        useMockData();
+        console.error("Dashboard data fetch error:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    function useMockData() {
-      setUserInfo(mockUserInfo);
-      setNotifications(mockNotifications);
-      setBusinessTrend(mockBusinessTrend);
-      setRunningAgents(mockRunningAgents);
-      setAgentKPIs(mockAgentKPIs);
-      setAssistants(mockAIAssistants);
-      setReports(mockInsightReports);
-      setLoading(false);
-    }
-
-    fetchData();
+    loadData();
   }, [restApi, period]);
 
   if (loading) {
@@ -108,35 +114,66 @@ export default function App({ restApi, i18nApi, params }: AppProps) {
   if (!userInfo) {
     return <div className="ad-empty">暂无数据</div>;
   }
-
+  console.log("agentRegistry", agentRegistry);
   return (
     <I18nContext.Provider value={i18nApi}>
       <div className="ad-container">
         {/* 区域1：顶部概览 */}
         <div className="ad-top-section">
           <div className="ad-top-left">
-            <NotificationPanel userInfo={userInfo} notifications={notifications} />
+            <NotificationPanel
+              userInfo={userInfo}
+              hitlTodos={hitlTodos}
+              agentRegistry={agentRegistry}
+              restApi={restApi}
+              messageApi={messageApi}
+              routerApi={routerApi}
+            />
           </div>
           <div className="ad-top-center">
-            {businessTrend && (
-              <BusinessTrendChart data={businessTrend} period={period} />
-            )}
+            <BusinessTrendChart
+              period={period}
+              restApi={restApi}
+            />
           </div>
           <div className="ad-top-right">
-            <RunningAgentList agents={runningAgents} />
+            <RunningAgentList
+              agentTasks={agentTasks}
+              agentRegistry={agentRegistry}
+              routerApi={routerApi}
+            />
           </div>
         </div>
 
         {/* 区域2：核心 Agent 工作成效 */}
-        <AgentKPICards kpis={agentKPIs} />
+        <AgentKPICards
+          metricDefinitions={metricDefinitions}
+          metricDailyValues={metricDailyValues}
+          agentRegistry={agentRegistry}
+        />
 
         {/* 区域3 + 4：底部两栏 */}
         <div className="ad-bottom-section">
           <div className="ad-bottom-left">
-            <AIAssistantPanel assistants={assistants} />
+            <AIAssistantPanel
+              favorites={favorites}
+              agentRegistry={agentRegistry}
+              restApi={restApi}
+              routerApi={routerApi}
+              onFavoritesChange={async () => {
+                if (restApi) {
+                  const updated = await fetchUserAgentFavorites(restApi);
+                  setFavorites(updated);
+                }
+              }}
+            />
           </div>
           <div className="ad-bottom-right">
-            <InsightReportPanel reports={reports} />
+            <InsightReportPanel
+              reports={insightReports}
+              agentRegistry={agentRegistry}
+              routerApi={routerApi}
+            />
           </div>
         </div>
       </div>
