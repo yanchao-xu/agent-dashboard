@@ -69,13 +69,24 @@ export default function BusinessTrendChart({ period, restApi }: Props) {
         {!loading && chartSchemas.length === 0 && (
           <div className="ad-empty">暂无图表配置</div>
         )}
-        {chartSchemas.map((schema, index) => (
+        {/* {chartSchemas.map((schema, index) => (
           <EChartRenderer
             key={index}
             schema={schema}
             restApi={restApi}
           />
-        ))}
+        ))} */}
+        <iframe
+          src="https://dxsrm-product.duxing.cn/ui/workbench-intelligence/dashboard/customer"
+          width="100%"
+          height="100%"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          allow="fullscreen; clipboard-write"
+          referrerPolicy="no-referrer"
+          loading="lazy"
+          style={{ overflow: "hidden" }}
+          scrolling="no"
+        />
       </div>
     </div>
   );
