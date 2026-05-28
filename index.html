@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agent Dashboard - Dev Preview (模拟 CETA 平台)</title>
+    <title>Extension Dev Preview (Mock Mode)</title>
     <style>
         * {
             margin: 0;
@@ -52,30 +52,57 @@
 <body>
     <div class="platform-header">
         <span class="logo">CETA 平台 (本地模拟)</span>
-        <span class="hint">此页面仅用于本地开发预览，模拟宿主平台加载组件扩展</span>
+        <span class="hint">此页面仅用于本地开发预览（Mock 模式），模拟宿主平台加载扩展组件</span>
     </div>
     <div class="platform-body">
         <div id="app"></div>
     </div>
     <script type="module">
-        import mount from './entry.js';
+        import mount from './src/main.tsx';
         import { mockRestApi } from './src/mockRestApi.ts';
 
-        // 模拟 CETA 平台的 i18nApi
+        // 模拟 CETA 平台注入的 API
         const mockI18nApi = {
             language: 'zh-CN',
             t: (key) => key,
         };
 
+        const mockMessageApi = {
+            error: (msg) => console.error('[Message]', msg),
+            warning: (msg) => console.warn('[Message]', msg),
+            success: (msg) => console.log('[Message]', msg),
+        };
+
+        const mockFormApi = {
+            getData: () => ({}),
+            setData: () => { },
+            getValue: () => undefined,
+            setValue: () => { },
+            submit: async () => { },
+            cancel: () => { },
+            on: () => { },
+        };
+
+        const mockRouterApi = {
+            navigate: (path) => console.log('[Router] navigate:', path),
+        };
+
         // 模拟平台调用 mount，传入容器和各种 API
-        // index.html 本地预览始终使用 mock 数据
         mount(document.getElementById('app'), {
-            params: { period: 'month' },
-            formApi: {},
-            messageApi: { error: console.error, warning: console.warn, success: console.log },
+            params: {
+                period: 'month',
+                userInfo: { name: 'Stephen', role: 'Admin', period: 'month' },
+                // Mock 权限配置（开发阶段使用，上线后由 CETA extensionParams 传入真实值）
+                permissions: {
+                    // canApprove: true,
+                    // canDelete: false,
+                },
+            },
+            formApi: mockFormApi,
+            messageApi: mockMessageApi,
             restApi: mockRestApi,
             i18nApi: mockI18nApi,
-            routerApi: { navigate: (path) => console.log('navigate:', path) },
+            routerApi: mockRouterApi,
         });
     </script>
 </body>
